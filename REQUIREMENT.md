@@ -1,0 +1,303 @@
+# K. Wah Interior AI - Requirements Document
+
+## Project Overview
+
+**Project Name**: K. Wah Interior AI Concept Designer  
+**Type**: Single Page Application (SPA)  
+**Framework**: React (Create React App)  
+**Version**: 0.1.0  
+**Last Updated**: January 7, 2026
+
+## Purpose
+
+An AI-powered interior design concept generator that allows users to upload photos of raw properties and receive luxury interior design concepts inspired by K. Wah's signature aesthetic.
+
+## Functional Requirements
+
+### 1. Image Upload System
+
+#### FR-1.1: Multiple Image Upload
+- **Description**: Users can upload up to 5 images of their property
+- **Acceptance Criteria**:
+  - Support multiple file selection
+  - Accept only image file formats (JPEG, PNG, etc.)
+  - Display error message if limit exceeds 5 images
+  - Show image counter (X/5)
+
+#### FR-1.2: Image Preview & Management
+- **Description**: Display uploaded images as thumbnails with remove functionality
+- **Acceptance Criteria**:
+  - Show 5 thumbnail slots in a grid layout
+  - Display remove (X) button on hover
+  - Update counter when images are removed
+  - Free up slots for new uploads after removal
+
+### 2. AI Concept Generation
+
+#### FR-2.1: Generate Design Concept
+- **Description**: Process uploaded images and generate design concept using NanoBanana API
+- **API Integration**: Image-to-Image generation (IMAGETOIAMGE mode)
+- **Acceptance Criteria**:
+  - Button disabled when no images uploaded
+  - Submit images to NanoBanana API with configured prompt
+  - Receive task ID from API
+  - Show real-time progress updates
+  - Automatically poll task status every 5 seconds
+  - Display generated image when complete
+  - Handle API errors gracefully
+  - Update credit balance after generation
+  - Maximum 60 polling attempts (5 minutes total)
+
+#### FR-2.2: Result Display
+- **Description**: Show generated concept with metadata
+- **Acceptance Criteria**:
+  - Display full-size generated image from API
+  - Show design metadata (Palette, Lighting, Materials)
+  - Display "Concept Approved" badge
+  - Include style description overlay
+  - Show task ID for reference
+  - Handle image loading states
+
+#### FR-2.3: Generation Progress Tracking
+- **Description**: Real-time feedback during generation process
+- **Acceptance Criteria**:
+  - Show "Preparing images..." status
+  - Display "Submitting to NanoBanana AI..." message
+  - Show task ID after submission
+  - Update with "Generating your luxury interior concept..." status
+  - Display polling progress
+  - Show completion message
+  - Handle timeout scenarios gracefully
+
+### 3. User Interface
+
+#### FR-3.1: Responsive Design
+- **Description**: Application works on all device sizes
+- **Acceptance Criteria**:
+  - Desktop layout (1200px+): Side-by-side panels
+  - Tablet layout (768px-1199px): Stacked layout
+  - Mobile layout (<768px): Single column
+
+#### FR-3.2: Brand Styling
+- **Description**: Consistent K. Wah brand identity
+- **Acceptance Criteria**:
+  - Navy (#002147) primary color
+  - Gold (#b59a5d) accent color
+  - Serif typography for headings
+  - Sans-serif for body text
+  - Gold accent bar at top
+
+### 4. API Integration
+
+#### FR-4.1: Credit Balance Display
+- **Description**: Display user's NanoBanana API account credit balance in real-time
+- **API**: [NanoBanana API - Get Account Credits](https://docs.nanobananaapi.ai/common-api/get-account-credits)
+- **Acceptance Criteria**:
+  - Fetch credit balance on component mount
+  - Display credit balance in header (top-right corner)
+  - Show loading state while fetching
+  - Display error state with retry option if fetch fails
+  - Include refresh button to manually update balance
+  - Format credits with thousand separators
+  - Handle API error codes (401, 402, 429, 500, etc.)
+  - Gracefully handle missing API key (show unavailable state)
+
+#### FR-4.2: API Error Handling
+- **Description**: Robust error handling for API requests
+- **Acceptance Criteria**:
+  - 401 Unauthorized: Show "Invalid API Key" error
+  - 402 Insufficient Credits: Show "No Credits" warning
+  - 429 Rate Limited: Show "Rate Limited" with retry
+  - 500 Server Error: Show "Service Unavailable"
+  - Network errors: Show generic error with retry option
+  - Log errors to console for debugging
+
+### 5. Navigation
+
+#### FR-5.1: Header Navigation
+- **Description**: Top navigation with brand logo and credit display
+- **Acceptance Criteria**:
+  - Display K. WAH GROUP logo
+  - Show "Interior AI Concept" tagline
+  - Display credit balance on right side
+  - Sticky header on scroll
+
+#### FR-5.2: Footer
+- **Description**: Footer with copyright and links
+- **Acceptance Criteria**:
+  - Display copyright notice
+  - Include Privacy, Terms, Contact links
+  - Match brand styling
+
+## Non-Functional Requirements
+
+### NFR-1: Performance
+- Page load time < 2 seconds
+- Smooth animations and transitions
+- Optimized image loading
+
+### NFR-2: Accessibility
+- Semantic HTML structure
+- Alt text for images
+- Keyboard navigation support
+- ARIA labels where appropriate
+
+### NFR-3: Browser Compatibility
+- Chrome (latest 2 versions)
+- Firefox (latest 2 versions)
+- Safari (latest 2 versions)
+- Edge (latest 2 versions)
+
+### NFR-4: Code Quality
+- ESLint configuration
+- Consistent code formatting
+- Component-based architecture
+- Reusable components
+
+### NFR-5: Maintainability
+- Clear folder structure
+- Documented code where necessary
+- Separation of concerns
+- Configuration files for styling (Tailwind)
+
+## Technical Requirements
+
+### TR-1: Dependencies
+- React 18.2.0+
+- React Scripts 5.0.1
+- Tailwind CSS 3.3.6+
+- Lucide React 0.294.0+
+- PostCSS & Autoprefixer
+
+### TR-2: External APIs
+- **NanoBanana API**: AI Image Generation & Credit Management
+  - Base URL: `https://api.nanobananaapi.ai/api/v1`
+  - Authentication: Bearer Token (in Authorization header)
+  - Documentation: https://docs.nanobananaapi.ai/
+  - Rate Limiting: Subject to API provider limits
+  - Global availability: Worldwide access
+  
+  **Endpoints Used**:
+  1. `GET /api/v1/common/credit`
+     - Purpose: Check account credit balance
+     - Response: Credit amount (integer)
+  
+  2. `POST /api/v1/nanobanana/generate`
+     - Purpose: Submit image generation task
+     - Mode: IMAGETOIAMGE (Image-to-Image editing)
+     - Parameters: prompt, imageUrls, type, numImages, image_size, callBackUrl, watermark
+     - Response: taskId (string)
+  
+  3. `GET /api/v1/nanobanana/task/{taskId}`
+     - Purpose: Check task status
+     - Polling: Every 5 seconds
+     - Response: Task details, status, resultImageUrl
+
+### TR-3: Build System
+- Create React App configuration
+- Webpack bundling
+- Hot module replacement in development
+- Production optimization
+
+### TR-4: Styling
+- Tailwind CSS utility classes
+- PostCSS processing
+- Custom color scheme
+- Responsive breakpoints
+
+### TR-5: Environment Variables
+Required variables (stored in `.env.local`, not committed to version control):
+
+- `REACT_APP_NANOBANANA_API_KEY` (Required)
+  - Your NanoBanana API Bearer token
+  - Used for authentication
+  
+- `REACT_APP_CALLBACK_URL` (Required)
+  - URL to receive generation completion callbacks
+  - Can use webhook.site for testing
+  - App uses polling, so actual callback reception is optional
+
+- `REACT_APP_DEFAULT_PROMPT` (Optional, has default)
+  - Text prompt for interior design generation
+  - Default: K. Wah luxury interior design prompt
+  - Fully customizable by user
+
+- `REACT_APP_IMAGE_SIZE` (Optional, default: "16:9")
+  - Aspect ratio for generated images
+  - Options: 1:1, 9:16, 16:9, 3:4, 4:3, 3:2, 2:3, 5:4, 4:5, 21:9
+
+- `REACT_APP_NUM_IMAGES` (Optional, default: 1)
+  - Number of images to generate per request
+  - Range: 1-4
+
+- `REACT_APP_WATERMARK` (Optional)
+  - Watermark text for generated images
+  - Default: "K.WAH"
+
+## Future Enhancements
+
+### Phase 2 (Future)
+- [ ] Real AI API integration
+- [ ] User authentication system
+- [ ] Save/favorite designs
+- [ ] Multiple style options
+- [ ] 3D room visualization
+- [ ] Export to PDF/PNG
+- [ ] Share concepts via link
+- [ ] Design history tracking
+
+### Phase 3 (Future)
+- [ ] Multi-language support
+- [ ] Mobile app version
+- [ ] VR/AR preview
+- [ ] Collaborative features
+- [ ] Professional designer consultation
+- [ ] E-commerce integration
+
+## Constraints & Limitations
+
+### Current Limitations
+1. ~~**Mock AI**: Currently uses placeholder image, no real AI processing~~ ✅ **Resolved** - Now uses real NanoBanana API
+2. **No Backend**: Frontend-only application (API keys exposed in frontend)
+3. **No Persistence**: No data storage, state lost on refresh
+4. **Limited Customization**: Style controlled via environment variable prompt only
+5. **Image URL Limitation**: Frontend apps can't easily upload images to get public URLs
+   - Current: Uses blob URLs (may not work with API)
+   - Solution: Need backend service or cloud storage for image hosting
+6. **Polling Only**: Uses polling instead of real-time callbacks (frontend limitation)
+
+### Technical Constraints
+1. Browser-based only (no mobile apps)
+2. Requires modern browser with ES6+ support
+3. Client-side processing only
+4. No offline functionality
+5. API keys visible in browser (consider backend proxy for production)
+6. Dependent on third-party API availability (NanoBanana)
+
+### Security Considerations
+1. **API Key Exposure**: Frontend environment variables are exposed in browser
+   - Recommendation: Implement backend proxy for production
+   - Current: Direct API calls from frontend
+2. **Rate Limiting**: Subject to NanoBanana API rate limits
+3. **CORS**: Dependent on API provider's CORS configuration
+
+## Success Metrics
+
+### User Experience
+- Intuitive upload process (< 3 clicks)
+- Fast loading times (< 2s)
+- Clear visual feedback at each step
+- Professional, luxury aesthetic
+
+### Technical
+- Zero console errors
+- Lighthouse score > 90
+- Mobile responsiveness 100%
+- Clean code (linter passing)
+
+---
+
+**Document Version**: 1.0  
+**Status**: Active Development  
+**Next Review**: Upon Phase 2 planning
+
