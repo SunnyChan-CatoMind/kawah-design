@@ -167,6 +167,19 @@ export const generateImage = async ({
       requestBody.watermark = watermark;
     }
 
+    // Log the complete request for debugging
+    console.log('=== NANOBANANA API REQUEST ===');
+    console.log('Endpoint:', `${API_BASE_URL}/nanobanana/generate`);
+    console.log('Method: POST');
+    console.log('Headers:', {
+      'Authorization': `Bearer ${apiKey.substring(0, 10)}...`,
+      'Content-Type': 'application/json'
+    });
+    console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+    console.log('Number of images:', imageUrls.length);
+    console.log('Image URLs:', imageUrls);
+    console.log('==============================');
+
     const response = await fetch(`${API_BASE_URL}/nanobanana/generate`, {
       method: 'POST',
       headers: {
@@ -198,6 +211,7 @@ export const generateImage = async ({
 
 /**
  * Get task details and status
+ * Documentation: https://docs.nanobananaapi.ai/nanobanana-api/get-task-details
  * @param {string} taskId - The task ID to query
  * @returns {Promise<Object>} Task details including status and result
  */
@@ -209,7 +223,8 @@ export const getTaskDetails = async (taskId) => {
   }
 
   try {
-    const url = `${API_BASE_URL}/nanobanana/task/${taskId}`;
+    // Correct endpoint: /record-info with query parameter
+    const url = `${API_BASE_URL}/nanobanana/record-info?taskId=${taskId}`;
     console.log('Fetching task details from:', url);
     
     const response = await fetch(url, {
@@ -227,6 +242,8 @@ export const getTaskDetails = async (taskId) => {
 
     if (data.code === 200) {
       return data.data;
+    } else if (data.code === 404) {
+      throw new Error('Task not found - please check task ID');
     } else {
       console.error('Task details error - Code:', data.code, 'Message:', data.msg);
       throw new Error(data.msg || `Failed to get task details (code: ${data.code})`);
@@ -261,25 +278,34 @@ export const pollTaskStatus = async (
       const taskDetails = await getTaskDetails(taskId);
       
       console.log('Task details received:', taskDetails);
+      console.log('successFlag:', taskDetails.successFlag);
       
       // Call progress callback
       onProgress(taskDetails);
 
-      // Check task status
-      // The response structure varies, check for completion indicators
-      if (taskDetails.status === 'completed' || 
-          taskDetails.status === 'success' ||
-          (taskDetails.info && taskDetails.info.resultImageUrl)) {
+      // Check task status based on successFlag
+      // 0: GENERATING, 1: SUCCESS, 2: CREATE_TASK_FAILED, 3: GENERATE_FAILED
+      if (taskDetails.successFlag === 1) {
+        // SUCCESS - Task completed
         console.log('Task completed successfully!');
-        return taskDetails;
-      } else if (taskDetails.status === 'failed' || 
-                 taskDetails.status === 'error' ||
-                 taskDetails.code >= 400) {
-        throw new Error(taskDetails.msg || 'Image generation failed');
-      } else if (taskDetails.status === 'processing' || 
-                 taskDetails.status === 'pending' ||
-                 taskDetails.status === 'queued') {
-        console.log('Task still processing, will retry...');
+        console.log('Result image URL:', taskDetails.response?.resultImageUrl);
+        
+        // Return in format expected by component
+        return {
+          ...taskDetails,
+          info: {
+            resultImageUrl: taskDetails.response?.resultImageUrl || taskDetails.response?.originImageUrl
+          }
+        };
+      } else if (taskDetails.successFlag === 2) {
+        // CREATE_TASK_FAILED
+        throw new Error('Failed to create task: ' + (taskDetails.errorMessage || 'Unknown error'));
+      } else if (taskDetails.successFlag === 3) {
+        // GENERATE_FAILED
+        throw new Error('Image generation failed: ' + (taskDetails.errorMessage || 'Unknown error'));
+      } else if (taskDetails.successFlag === 0) {
+        // GENERATING - Still processing
+        console.log('Task still generating, will retry in', interval/1000, 'seconds...');
       }
 
       // Continue polling if not completed and haven't exceeded max attempts
@@ -288,17 +314,18 @@ export const pollTaskStatus = async (
         return poll();
       } else {
         console.error('Task polling timeout after', attempts, 'attempts');
-        throw new Error('Task polling timeout - Generation may still be in progress. Task ID: ' + taskId);
+        throw new Error('Task polling timeout - Generation taking longer than expected. Task ID: ' + taskId);
       }
     } catch (error) {
       console.error('Polling error on attempt', attempts, ':', error);
       
-      // If it's a network error or timeout, retry
+      // If it's a network error or task not found yet, retry
       if (attempts < maxAttempts && 
           (error.message.includes('timeout') || 
            error.message.includes('network') ||
+           error.message.includes('Task not found') ||
            error.message.includes('Failed to fetch'))) {
-        console.log('Network error, retrying...');
+        console.log('Retrying in', interval/1000, 'seconds...');
         await new Promise(resolve => setTimeout(resolve, interval));
         return poll();
       }

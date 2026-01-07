@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, X, Sparkles, Image as ImageIcon, Loader2, Coins, RefreshCw, AlertCircle } from 'lucide-react';
 import { getAccountCredits, formatCredits, generateImage, pollTaskStatus, uploadImageToImgBB } from '../services/api';
+import designOptions from '../config/designOptions.json';
 
 const KwahAIApp = () => {
   const [images, setImages] = useState([]);
@@ -13,6 +14,10 @@ const KwahAIApp = () => {
   const [credits, setCredits] = useState(null);
   const [creditsLoading, setCreditsLoading] = useState(true);
   const [creditsError, setCreditsError] = useState(null);
+  
+  // Design options
+  const [selectedRoomType, setSelectedRoomType] = useState('living_room');
+  const [selectedStyle, setSelectedStyle] = useState('kwah_luxury');
 
   // K.Wah Colors
   const colors = {
@@ -65,6 +70,20 @@ const KwahAIApp = () => {
     }
   };
 
+  // Function to replace placeholders in prompt template
+  const buildPrompt = (template, roomType, style) => {
+    // Get the display labels
+    const roomTypeLabel = designOptions.roomTypes.find(r => r.value === roomType)?.label || roomType;
+    const styleLabel = designOptions.styles.find(s => s.value === style)?.label || style;
+    
+    // Replace placeholders
+    let finalPrompt = template
+      .replace(/{ROOM_TYPE}/g, roomTypeLabel)
+      .replace(/{STYLE}/g, styleLabel);
+    
+    return finalPrompt;
+  };
+
   const generateConcept = async () => {
     if (images.length === 0) {
       alert("Please upload at least one image first.");
@@ -78,8 +97,19 @@ const KwahAIApp = () => {
 
     try {
       // Get configuration from environment variables
-      const prompt = process.env.REACT_APP_DEFAULT_PROMPT || 
-        'Transform this space into a luxurious K. Wah signature interior design with modern minimalist aesthetic';
+      const promptTemplate = process.env.REACT_APP_DEFAULT_PROMPT || 
+        'Transform this {ROOM_TYPE} into a luxurious {STYLE} interior design with premium materials and elegant furniture.';
+      
+      // Build final prompt with selected room type and style
+      const prompt = buildPrompt(promptTemplate, selectedRoomType, selectedStyle);
+      
+      // Log the final prompt for debugging
+      console.log('=== GENERATION REQUEST ===');
+      console.log('Room Type:', selectedRoomType);
+      console.log('Style:', selectedStyle);
+      console.log('Final Prompt:', prompt);
+      console.log('=========================');
+      
       const callBackUrl = process.env.REACT_APP_CALLBACK_URL || 'https://webhook.site/placeholder';
       const imageSize = process.env.REACT_APP_IMAGE_SIZE || '16:9';
       const numImages = parseInt(process.env.REACT_APP_NUM_IMAGES || '1');
@@ -224,10 +254,10 @@ const KwahAIApp = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-stretch">
           
           {/* Left Side: Upload Controls */}
-          <div className="lg:col-span-5 space-y-8">
+          <div className="lg:col-span-5 space-y-8 flex flex-col">
             <section>
               <h1 style={{ color: colors.navy }} className="text-4xl font-light mb-4 tracking-tight">
                 Design Your <span className="italic">Future Living</span>
@@ -235,6 +265,64 @@ const KwahAIApp = () => {
               <p className="text-slate-500 font-sans text-sm leading-relaxed mb-8">
                 Upload up to 5 reference photos of your raw property. Our AI will analyze the spatial structure and lighting to generate a K. Wah inspired luxury concept.
               </p>
+
+              {/* Design Options */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Room Type Selector */}
+                <div>
+                  <label className="block font-sans text-[10px] uppercase tracking-widest text-slate-500 mb-2">
+                    Room Type
+                  </label>
+                  <select
+                    value={selectedRoomType}
+                    onChange={(e) => setSelectedRoomType(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-sm font-sans text-sm bg-white hover:border-gray-400 focus:border-[#b59a5d] focus:outline-none transition"
+                    style={{ color: colors.navy }}
+                  >
+                    {designOptions.roomTypes.map((room) => (
+                      <option key={room.value} value={room.value}>
+                        {room.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Style Selector */}
+                <div>
+                  <label className="block font-sans text-[10px] uppercase tracking-widest text-slate-500 mb-2">
+                    Design Style
+                  </label>
+                  <select
+                    value={selectedStyle}
+                    onChange={(e) => setSelectedStyle(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-sm font-sans text-sm bg-white hover:border-gray-400 focus:border-[#b59a5d] focus:outline-none transition"
+                    style={{ color: colors.navy }}
+                  >
+                    {designOptions.styles.map((style) => (
+                      <option key={style.value} value={style.value}>
+                        {style.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Selected Options Display */}
+              <div className="mb-6 p-3 bg-gray-50 border border-gray-200 rounded-sm">
+                <p className="text-[9px] font-sans uppercase tracking-widest text-slate-400 mb-1">
+                  Selected Configuration
+                </p>
+                <p className="text-xs font-sans text-slate-700">
+                  <span style={{ color: colors.gold }} className="font-bold">
+                    {designOptions.roomTypes.find(r => r.value === selectedRoomType)?.label}
+                  </span>
+                  {' '} in {' '}
+                  <span style={{ color: colors.gold }} className="font-bold">
+                    {designOptions.styles.find(s => s.value === selectedStyle)?.label}
+                  </span>
+                  {' '} style
+                </p>
+              </div>
 
               {/* Upload Zone */}
               <div 
@@ -324,15 +412,11 @@ const KwahAIApp = () => {
           </div>
 
           {/* Right Side: Preview Area */}
-          <div className="lg:col-span-7">
-            <div className="relative aspect-[16/10] bg-[#f9f9f9] overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center">
+          <div className="lg:col-span-7 flex flex-col">
+            <div className="relative aspect-[16/10] bg-[#f9f9f9] overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center flex-shrink-0">
               {resultImage ? (
                 <div className="relative w-full h-full animate-in fade-in zoom-in duration-1000">
-                  <img src={resultImage} alt="AI Concept" className="w-full h-full object-cover" />
-                  <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md p-4 pr-12 border-l-4 border-[#b59a5d]">
-                    <h3 className="text-xs uppercase tracking-widest font-bold mb-1">Concept Approved</h3>
-                    <p className="text-[10px] font-sans text-slate-500 uppercase tracking-tighter">Modern Minimalist · K. Wah Signature Style</p>
-                  </div>
+                  <img src={resultImage} alt="AI Generated Interior Design" className="w-full h-full object-cover" />
                 </div>
               ) : (
                 <div className="text-center px-10">

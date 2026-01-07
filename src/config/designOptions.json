@@ -1,0 +1,106 @@
+{
+  "roomTypes": [
+    {
+      "value": "living_room",
+      "label": "Living Room",
+      "description": "Main seating area, usually with a TV wall"
+    },    
+    {
+      "value": "living_dining_combo",
+      "label": "Living and Dining Combo",
+      "description": "The standard long or square hall found in HK"
+    },
+    {
+      "value": "master_bedroom",
+      "label": "Master Bedroom",
+      "description": "Usually includes space for a large wardrobe"
+    },
+    {
+      "value": "guest_kids_bedroom",
+      "label": "Guest/Kid's Room",
+      "description": "Focused on bunk beds or platform storage beds"
+    },
+    {
+      "value": "closed_kitchen",
+      "label": "Closed Kitchen",
+      "description": "Traditional kitchen with a door"
+    },
+    {
+      "value": "open_kitchen",
+      "label": "Open Kitchen",
+      "description": "Modern Studio style kitchen (very common in 300ft² to 400ft² flats)"
+    },
+    {
+      "value": "master_washroom",
+      "label": "Master Washroom",
+      "description": "Typically includes a bathtub or premium vanity"
+    },
+    {
+      "value": "guest_washroom",
+      "label": "Guest Washroom",
+      "description": "Usually a walk-in shower (wet/dry separation) design"
+    },
+    {
+      "value": "dining_room",
+      "label": "Dining Room",
+      "description": "Specifically for the dining table area"
+    },
+    {
+      "value": "home_office_study",
+      "label": "Home Office / Study",
+      "description": "Focused on desk setups and bookshelves"
+    },
+    {
+      "value": "foyer",
+      "label": "Foyer/Entrance",
+      "description": "Emphasis on full-height shoe cabinets and drop zones"
+    },
+    {
+      "value": "storage_room",
+      "label": "Storage Room",
+      "description": "Focus on floor-to-ceiling shelving and hidden storage"
+    },
+    {
+      "value": "balcony",
+      "label": "Balcony/Terrace",
+      "description": "Important for luxury HK flats and focuses on decking and plants"
+    }
+  ],
+  "styles": [
+    {
+      "value": "kwah_luxury",
+      "label": "K. Wah Luxury",
+      "description": "Signature K. Wah style with champagne & oak palette"
+    },
+    {
+      "value": "japandi",
+      "label": "Japandi",
+      "description": "Modern Japandi style with light oak and zen aesthetics"
+    },
+    {
+      "value": "light_luxury",
+      "label": "Light Luxury",
+      "description": "High-end Light Luxury with marble and gold accents"
+    },
+    {
+      "value": "muji_minimalist",
+      "label": "Muji Minimalist",
+      "description": "Muji-inspired design with warm wood and white tones"
+    },
+    {
+      "value": "industrial",
+      "label": "Industrial",
+      "description": "Modern Industrial loft with concrete and black metal"
+    },
+    {
+      "value": "nordic",
+      "label": "Nordic",
+      "description": "Scandinavian style with cozy textures and bright light"
+    },
+    {
+      "value": "modern_sleek",
+      "label": "Modern Sleek",
+      "description": "Contemporary minimalist with hidden storage and glass"
+    }
+  ]
+}
