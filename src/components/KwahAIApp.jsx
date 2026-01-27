@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, X, Sparkles, Image as ImageIcon, Loader2, Coins, RefreshCw, AlertCircle } from 'lucide-react';
 import { getAccountCredits, formatCredits, generateImage, pollTaskStatus, uploadImageToImgBB } from '../services/api';
 import designOptions from '../config/designOptions.json';
+import { promptTemplates, DEFAULT_TEMPLATE } from '../config/promptTemplates';
 
 const KwahAIApp = () => {
   const [images, setImages] = useState([]);
@@ -18,6 +19,10 @@ const KwahAIApp = () => {
   // Design options
   const [selectedRoomType, setSelectedRoomType] = useState('living_room');
   const [selectedStyle, setSelectedStyle] = useState('kwah_luxury');
+  
+  // Budget range (in HKD)
+  const [budgetFrom, setBudgetFrom] = useState(100000);
+  const [budgetTo, setBudgetTo] = useState(500000);
 
   // K.Wah Colors
   const colors = {
@@ -70,16 +75,27 @@ const KwahAIApp = () => {
     }
   };
 
+  // Format number with commas
+  const formatBudget = (value) => {
+    return new Intl.NumberFormat('en-HK').format(value);
+  };
+
   // Function to replace placeholders in prompt template
-  const buildPrompt = (template, roomType, style) => {
+  const buildPrompt = (template, roomType, style, budgetFrom, budgetTo) => {
     // Get the display labels
     const roomTypeLabel = designOptions.roomTypes.find(r => r.value === roomType)?.label || roomType;
     const styleLabel = designOptions.styles.find(s => s.value === style)?.label || style;
     
+    // Format budget values
+    const budgetFromFormatted = formatBudget(budgetFrom);
+    const budgetToFormatted = formatBudget(budgetTo);
+    
     // Replace placeholders
     let finalPrompt = template
       .replace(/{ROOM_TYPE}/g, roomTypeLabel)
-      .replace(/{STYLE}/g, styleLabel);
+      .replace(/{STYLE}/g, styleLabel)
+      .replace(/{BUDGET_FROM}/g, budgetFromFormatted)
+      .replace(/{BUDGET_TO}/g, budgetToFormatted);
     
     return finalPrompt;
   };
@@ -96,17 +112,19 @@ const KwahAIApp = () => {
     setResultImage(null);
 
     try {
-      // Get configuration from environment variables
-      const promptTemplate = process.env.REACT_APP_DEFAULT_PROMPT || 
+      // Get prompt template from config file (fallback to env variable if needed)
+      const promptTemplate = promptTemplates[DEFAULT_TEMPLATE] || 
+        process.env.REACT_APP_DEFAULT_PROMPT || 
         'Transform this {ROOM_TYPE} into a luxurious {STYLE} interior design with premium materials and elegant furniture.';
       
-      // Build final prompt with selected room type and style
-      const prompt = buildPrompt(promptTemplate, selectedRoomType, selectedStyle);
+      // Build final prompt with selected room type, style, and budget
+      const prompt = buildPrompt(promptTemplate, selectedRoomType, selectedStyle, budgetFrom, budgetTo);
       
       // Log the final prompt for debugging
       console.log('=== GENERATION REQUEST ===');
       console.log('Room Type:', selectedRoomType);
       console.log('Style:', selectedStyle);
+      console.log('Budget Range: HKD', formatBudget(budgetFrom), '-', formatBudget(budgetTo));
       console.log('Final Prompt:', prompt);
       console.log('=========================');
       
@@ -307,6 +325,68 @@ const KwahAIApp = () => {
                 </div>
               </div>
 
+              {/* Budget Range Selector */}
+              <div className="mb-6">
+                <label className="block font-sans text-[10px] uppercase tracking-widest text-slate-500 mb-3">
+                  Renovation Budget (HKD)
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Budget From */}
+                  <div>
+                    <label className="block text-[9px] font-sans uppercase tracking-wider text-slate-400 mb-1">
+                      From
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">HKD</span>
+                      <input
+                        type="number"
+                        min="100000"
+                        step="50000"
+                        value={budgetFrom}
+                        onChange={(e) => {
+                          const value = Math.max(100000, parseInt(e.target.value) || 100000);
+                          setBudgetFrom(value);
+                          if (value > budgetTo) {
+                            setBudgetTo(value);
+                          }
+                        }}
+                        className="w-full pl-14 pr-4 py-3 border border-gray-300 rounded-sm font-sans text-sm bg-white hover:border-gray-400 focus:border-[#b59a5d] focus:outline-none transition"
+                        style={{ color: colors.navy }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Budget To */}
+                  <div>
+                    <label className="block text-[9px] font-sans uppercase tracking-wider text-slate-400 mb-1">
+                      To
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">HKD</span>
+                      <input
+                        type="number"
+                        min="100000"
+                        step="50000"
+                        value={budgetTo}
+                        onChange={(e) => {
+                          const value = Math.max(budgetFrom, parseInt(e.target.value) || budgetFrom);
+                          setBudgetTo(value);
+                        }}
+                        className="w-full pl-14 pr-4 py-3 border border-gray-300 rounded-sm font-sans text-sm bg-white hover:border-gray-400 focus:border-[#b59a5d] focus:outline-none transition"
+                        style={{ color: colors.navy }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Budget Display */}
+                <div className="mt-2 text-center">
+                  <p className="text-xs font-sans text-slate-500">
+                    Budget Range: <span style={{ color: colors.gold }} className="font-bold">HKD {formatBudget(budgetFrom)} - {formatBudget(budgetTo)}</span>
+                  </p>
+                </div>
+              </div>
+
               {/* Selected Options Display */}
               <div className="mb-6 p-3 bg-gray-50 border border-gray-200 rounded-sm">
                 <p className="text-[9px] font-sans uppercase tracking-widest text-slate-400 mb-1">
@@ -321,6 +401,9 @@ const KwahAIApp = () => {
                     {designOptions.styles.find(s => s.value === selectedStyle)?.label}
                   </span>
                   {' '} style
+                </p>
+                <p className="text-xs font-sans text-slate-700 mt-1">
+                  Budget: <span style={{ color: colors.gold }} className="font-bold">HKD {formatBudget(budgetFrom)} - {formatBudget(budgetTo)}</span>
                 </p>
               </div>
 
