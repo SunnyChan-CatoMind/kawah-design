@@ -64,6 +64,26 @@
       "value": "balcony",
       "label": "Balcony/Terrace",
       "description": "Important for luxury HK flats and focuses on decking and plants"
+    },
+    {
+      "value": "main_entrance_lobby",
+      "label": "Main Entrance Lobby",
+      "description": "Grand entrance area of the residential estate"
+    },
+    {
+      "value": "elevator_lobby",
+      "label": "Elevator Lobby",
+      "description": "Common floor area near elevator banks and apartment entrances"
+    },
+    {
+      "value": "resident_lounge",
+      "label": "Resident Lounge",
+      "description": "Shared clubhouse or seating area for residents"
+    },
+    {
+      "value": "corridor",
+      "label": "Corridor",
+      "description": "Main residential hallways connecting units"
     }
   ],
   "styles": [
@@ -101,6 +121,21 @@
       "value": "modern_sleek",
       "label": "Modern Sleek",
       "description": "Contemporary minimalist with hidden storage and glass"
+    },
+    {
+      "value": "art_deco_accent",
+      "label": "Art Deco Accent",
+      "description": "Sophisticated geometric patterns with gold and velvet details"
+    },
+    {
+      "value": "modern_grandeur",
+      "label": "Modern Grandeur",
+      "description": "Marble surfaces, large-scale furniture, and expensive symmetry"
+    },
+    {
+      "value": "contemporary_nature",
+      "label": "Contemporary Nature",
+      "description": "Vertical timber slats, indoor greenery, and stone textures"
     }
   ]
 }
