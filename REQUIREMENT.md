@@ -3,14 +3,16 @@
 ## Project Overview
 
 **Project Name**: K. Wah Interior AI Concept Designer  
-**Type**: Single Page Application (SPA)  
+**Type**: Multi-Page React Application with Client-Side Routing  
 **Framework**: React (Create React App)  
-**Version**: 0.1.0  
-**Last Updated**: January 26, 2026
+**Version**: 0.2.0  
+**Last Updated**: February 3, 2026
 
 ## Purpose
 
-An AI-powered interior design concept generator that allows users to upload photos of raw properties and receive luxury interior design concepts inspired by K. Wah's signature aesthetic.
+An AI-powered interior design concept generator that provides two modes:
+1. **Template-Based Design**: Upload photos of raw properties and receive luxury interior design concepts inspired by K. Wah's signature aesthetic with predefined room types, styles, and budget ranges
+2. **Custom Adjustment**: Upload a single image and describe custom adjustments with complete creative control using free-form prompts
 
 ## Functional Requirements
 
@@ -96,16 +98,42 @@ An AI-powered interior design concept generator that allows users to upload phot
   - Show completion message
   - Handle timeout scenarios gracefully
 
-### 3. User Interface
+### 3. Custom Image Adjustment Page
 
-#### FR-3.1: Responsive Design
+#### FR-3.0: Custom Prompt Image Adjustment
+- **Description**: Separate page allowing users to upload a single image and provide custom prompt for adjustments
+- **Route**: `/custom`
+- **Acceptance Criteria**:
+  - Single image upload (replaces previous when new image selected)
+  - Custom text prompt input (no template restrictions)
+  - No predefined room type, style, or budget selections
+  - User has complete creative control over the prompt
+  - Same AI generation workflow using NanoBanana API
+  - Share same credit balance system
+  - Back navigation to main page
+  - Display task ID and generation progress
+  - Show generated result in preview area
+  - Handle all API errors gracefully
+
+#### FR-3.0.1: Navigation Between Pages
+- **Description**: Easy navigation between template-based and custom adjustment pages
+- **Acceptance Criteria**:
+  - "Custom Adjustment" button in main page header
+  - Back arrow button in custom page header
+  - React Router for client-side routing
+  - Maintains credit balance across pages
+  - No page reload on navigation
+
+### 4. User Interface
+
+#### FR-4.1: Responsive Design
 - **Description**: Application works on all device sizes
 - **Acceptance Criteria**:
   - Desktop layout (1200px+): Side-by-side panels
   - Tablet layout (768px-1199px): Stacked layout
   - Mobile layout (<768px): Single column
 
-#### FR-3.2: Brand Styling
+#### FR-4.2: Brand Styling
 - **Description**: Consistent K. Wah brand identity
 - **Acceptance Criteria**:
   - Navy (#002147) primary color
@@ -114,9 +142,9 @@ An AI-powered interior design concept generator that allows users to upload phot
   - Sans-serif for body text
   - Gold accent bar at top
 
-### 4. API Integration
+### 5. API Integration
 
-#### FR-4.1: Credit Balance Display
+#### FR-5.1: Credit Balance Display
 - **Description**: Display user's NanoBanana API account credit balance in real-time
 - **API**: [NanoBanana API - Get Account Credits](https://docs.nanobananaapi.ai/common-api/get-account-credits)
 - **Acceptance Criteria**:
@@ -129,7 +157,7 @@ An AI-powered interior design concept generator that allows users to upload phot
   - Handle API error codes (401, 402, 429, 500, etc.)
   - Gracefully handle missing API key (show unavailable state)
 
-#### FR-4.2: API Error Handling
+#### FR-5.2: API Error Handling
 - **Description**: Robust error handling for API requests
 - **Acceptance Criteria**:
   - 401 Unauthorized: Show "Invalid API Key" error
@@ -139,9 +167,9 @@ An AI-powered interior design concept generator that allows users to upload phot
   - Network errors: Show generic error with retry option
   - Log errors to console for debugging
 
-### 5. Navigation
+### 6. Navigation
 
-#### FR-5.1: Header Navigation
+#### FR-6.1: Header Navigation
 - **Description**: Top navigation with brand logo and credit display
 - **Acceptance Criteria**:
   - Display K. WAH GROUP logo
@@ -149,7 +177,7 @@ An AI-powered interior design concept generator that allows users to upload phot
   - Display credit balance on right side
   - Sticky header on scroll
 
-#### FR-5.2: Footer
+#### FR-6.2: Footer
 - **Description**: Footer with copyright and links
 - **Acceptance Criteria**:
   - Display copyright notice
@@ -191,6 +219,8 @@ An AI-powered interior design concept generator that allows users to upload phot
 
 ### TR-1: Dependencies
 - React 18.2.0+
+- React DOM 18.2.0+
+- React Router DOM 6.x (for client-side routing)
 - React Scripts 5.0.1
 - Tailwind CSS 3.3.6+
 - Lucide React 0.294.0+

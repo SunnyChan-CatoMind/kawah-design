@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, X, Sparkles, Image as ImageIcon, Loader2, Coins, RefreshCw, AlertCircle } from 'lucide-react';
+import { Upload, X, Sparkles, Image as ImageIcon, Loader2, Coins, RefreshCw, AlertCircle, Edit3 } from 'lucide-react';
 import { getAccountCredits, formatCredits, generateImage, pollTaskStatus, uploadImageToImgBB } from '../services/api';
 import designOptions from '../config/designOptions.json';
 import { promptTemplates, DEFAULT_TEMPLATE } from '../config/promptTemplates';
+import { Link } from 'react-router-dom';
 
 const KwahAIApp = () => {
   const [images, setImages] = useState([]);
@@ -233,7 +234,17 @@ const KwahAIApp = () => {
         </div>
         
         {/* Credit Balance Display */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          {/* Custom Adjustment Link */}
+          <Link 
+            to="/custom"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-sm hover:border-[#b59a5d] transition-colors"
+          >
+            <Edit3 style={{ color: colors.gold }} size={16} />
+            <span className="font-sans text-xs uppercase tracking-wider" style={{ color: colors.navy }}>
+              Custom Adjustment
+            </span>
+          </Link>
           {creditsLoading ? (
             <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-sm">
               <Loader2 className="animate-spin text-slate-400" size={16} />

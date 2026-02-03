@@ -111,6 +111,8 @@ kwah/
 ├── public/              # Static assets
 ├── src/
 │   ├── components/      # React components
+│   │   ├── KwahAIApp.jsx              # Main interior design page
+│   │   └── CustomImageAdjustment.jsx  # Custom prompt adjustment page
 │   ├── services/        # API services
 │   │   └── api.js      # NanoBanana API integration
 │   ├── index.js        # Entry point
@@ -119,6 +121,24 @@ kwah/
 ├── package.json        # Dependencies
 └── tailwind.config.js  # Tailwind configuration
 ```
+
+## Application Features
+
+The application now includes two main pages:
+
+### 1. **Interior AI Concept (Home Page)** - `/`
+- Upload up to 5 reference images
+- Select room type and design style from predefined options
+- Set renovation budget range (HKD)
+- Uses template-based prompts for K. Wah luxury interior design
+- Generates AI concept based on spatial analysis and selected parameters
+
+### 2. **Custom Image Adjustment** - `/custom`
+- Upload a single image
+- Enter your own custom prompt with complete creative control
+- No templates or predefined options
+- Direct user input for any type of image adjustment or transformation
+- Full flexibility for any design vision or adjustment needs
 
 ## Environment Variables
 
